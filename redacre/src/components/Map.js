@@ -1,15 +1,23 @@
-import React, { useRef, useEffect, useState }  from 'react';
+import React, { useRef, useEffect, useState, useCallback }  from 'react';
 import './Map.css';
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
+import { useStream } from 'react-fetch-streams';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiZWt1bWFtYWl0IiwiYSI6ImNremNyYW9ndTAwMTQydm8wd3hzd2dzemUifQ.ql5lo-vpdC8ynx2DfZgNKA';
 
 const Map = () => {
     const mapContainer = useRef(null);
     const map = useRef(null);
-    const [lng, setLng] = useState(14.495279788970945);
-    const [lat, setLat] = useState(35.915087047076575);
-    const [zoom, setZoom] = useState(13);
+    const [lng, setLng] = useState(14.4064);
+    const [lat, setLat] = useState(35.3651);
+    const [zoom, setZoom] = useState(11.00);
+
+    const onNext = useCallback(async res => {
+        const data = await res.json();
+        setLng(data.lng);
+        setLat(data.lat);
+    }, [setLng, setLat]);
+    useStream('http://localhost:5000/api/v1/location', {onNext});
 
     useEffect(() => {
       if (map.current) return; // initialize map only once
@@ -33,7 +41,7 @@ const Map = () => {
   return (
     <div>
         <div className="sidebar">
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+          Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
         </div>
         <div ref={mapContainer} className="map-container" />
     </div>
